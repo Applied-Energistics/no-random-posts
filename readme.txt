@@ -3,7 +3,7 @@ Contributors: jonoaldersonwp
 Tags: seo, privacy, redirects, permalinks
 Requires at least: 4.7
 Tested up to: 7.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,16 +12,20 @@ Disables WordPress random content URLs such as /random/ for every post type. No 
 
 == Description ==
 
-WordPress 7.2 adds public URLs that 302 to a randomly chosen published post. With the default base and pretty permalinks, that includes:
+WordPress 7.2 adds public URLs that 302 to a randomly chosen published post.
+
+Those URLs can expose content that was never meant to be public or indexed. Core has no noindex control for the content. Custom post types such as invoices are often registered without careful public flags. A type that is publicly queryable and has an archive is included unless it was registered with `randomable` set to false. The redirect URL can also be stored as its own URL by search engines and LLMs. Core sends `X-Robots-Tag: noindex` on the redirect response. That header does not stop the destination being discovered.
+
+The endpoints are on with no opt-in. They add new URLs to existing sites. That is awkward for enterprise sites, and for trust.
+
+With the default base and pretty permalinks, the URLs are:
 
 * `/random/` for any eligible post.
 * `/random/category/news/` and the same pattern for every public taxonomy.
 * `/random/author/name/` for a post by that author.
 * `/random/{post-type}/` for a custom post type.
 
-A post type is included when it is publicly queryable and has an archive, unless it was registered with `randomable` set to false. Custom post types are often registered without that argument, so content that was never linked (invoices, for example) can be selected and exposed. The redirect URL can also be stored as its own URL by search engines and LLMs. Core sends `X-Robots-Tag: noindex` on the redirect response. That header does not stop the destination being discovered, and it is not a noindex control for the content itself.
-
-WordPress resolves `/random/` with a random-order query (`ORDER BY RAND()` or the same class of query). That cost grows with the number of rows, and some hosts already restrict `RAND()`. Bots that request `/random/` over and over can amplify that into a load problem, including on large catalogues. Core has discussed an optimisation (https://core.trac.wordpress.org/ticket/64498#comment:58); it does not remove the scaling problem. This plugin makes those URLs 404 before that query runs.
+There is a further cost. WordPress resolves `/random/` with a random-order query (`ORDER BY RAND()` or the same class of query). The cost grows with the number of rows. Bots that request `/random/` over and over can turn that into a load problem. This plugin makes those URLs 404 before the query runs.
 
 This plugin turns the feature off for every post type. There is no setting, no admin screen, and nothing stored.
 
@@ -59,6 +63,9 @@ Yes. Older versions do not have the endpoints. The plugin does not fatal, and it
 No. It does not add options, tables, or files, and it does not send email or telemetry.
 
 == Changelog ==
+
+= 1.0.1 =
+* Readme now leads with content leakage and unexpected endpoints.
 
 = 1.0.0 =
 * Initial release.
