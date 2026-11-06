@@ -62,16 +62,7 @@ No. There are no database changes, no options, and nothing of its own to delete 
 == Changelog ==
 
 = 1.1.1 =
-* GitHub readme no longer includes the tests section.
-
-= 1.1.0 =
-* Released as 1.1.0.
-
-= 1.0.2 =
-* Readme is the explanation of what /random/ does.
-
-= 1.0.1 =
-* Readme now explains what /random/ does on a site you already have.
+* Tweak readme file.
 
 = 1.0.0 =
 * First release.
