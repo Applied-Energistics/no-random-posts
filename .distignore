@@ -6,7 +6,7 @@
 /.gitattributes
 /.phpunit.cache
 /.phpunit.result.cache
-/.wordpress-org
+/assets
 /tests
 /vendor
 /phpunit.xml
