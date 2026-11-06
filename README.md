@@ -26,5 +26,7 @@ See readme.txt for the WordPress plugin directory documentation and a link to th
 
 The tests use a lightweight mock of WordPress, so there's no need to set up a database or a full WordPress installation.
 
+```bash
 composer install
 composer test
+```
