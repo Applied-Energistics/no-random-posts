@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/Applied-Energistics/no-random-posts
  * Description:       Disables WordPress random content URLs, such as /random/, for every post type.
  * Version:           1.0.0
- * Requires at least: 4.6
+ * Requires at least: 4.7
  * Requires PHP:      7.2
  * Author:            Jono Alderson
  * Author URI:        https://www.jonoalderson.com/

@@ -301,7 +301,7 @@ class No_Random_Posts {
 			return false;
 		}
 
-		$query = parse_url( $target, PHP_URL_QUERY );
+		$query = wp_parse_url( $target, PHP_URL_QUERY );
 
 		if ( ! is_string( $query ) ) {
 			return false;

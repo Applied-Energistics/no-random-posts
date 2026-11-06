@@ -8,6 +8,28 @@
  * @package No_Random_Posts
  */
 
+defined( 'ABSPATH' ) || exit;
+
+if ( ! function_exists( 'wp_parse_url' ) ) {
+	/**
+	 * Stand-in for wp_parse_url().
+	 *
+	 * @param string $url       URL to parse.
+	 * @param int    $component Optional. Component to retrieve. Default -1.
+	 * @return array|string|int|null|false Same shape as parse_url().
+	 */
+	function wp_parse_url( $url, $component = -1 ) {
+
+		if ( $component === -1 ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- This stand-in is the wp_parse_url() implementation.
+			return parse_url( $url );
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- This stand-in is the wp_parse_url() implementation.
+		return parse_url( $url, $component );
+	}
+}
+
 if ( ! isset( $GLOBALS['wp_filter'] ) || ! is_array( $GLOBALS['wp_filter'] ) ) {
 	$GLOBALS['wp_filter'] = array();
 }

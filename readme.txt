@@ -1,7 +1,7 @@
 === No Random Posts ===
 Contributors: jonoaldersonwp
 Tags: seo, privacy, redirects, permalinks
-Requires at least: 4.6
+Requires at least: 4.7
 Tested up to: 7.1
 Stable tag: 1.0.0
 Requires PHP: 7.2
