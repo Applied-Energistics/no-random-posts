@@ -211,6 +211,100 @@ class NoRandomPostsTest extends TestCase {
 	}
 
 	/**
+	 * A public archive whose slug is the random base keeps its rewrite.
+	 *
+	 * Core stores one rule per pattern. The random redirect overwrites the archive
+	 * rule, so removing the redirect has to put the archive query back.
+	 * Page, post, and term rules for the slug "random" stay in place.
+	 *
+	 * @return void
+	 */
+	public function test_public_archive_at_the_random_base_is_rebuilt_in_memory(): void {
+
+		$secret                 = new stdClass();
+		$secret->name           = 'secret';
+		$secret->public         = false;
+		$secret->has_archive    = true;
+		$secret->rewrite        = array(
+			'slug'       => 'random',
+			'with_front' => true,
+		);
+		$library                = new stdClass();
+		$library->name          = 'library';
+		$library->public        = true;
+		$library->has_archive   = true;
+		$library->rewrite       = array(
+			'slug'       => 'random',
+			'with_front' => true,
+		);
+		$GLOBALS['wp_post_types'] = array(
+			'secret'  => $secret,
+			'library' => $library,
+		);
+		$GLOBALS['wp_rewrite']        = new stdClass();
+		$GLOBALS['wp_rewrite']->root  = '';
+		$GLOBALS['wp_rewrite']->front = '';
+		$GLOBALS['wp_rewrite']->index = 'index.php';
+		$GLOBALS['wp_rewrite']->random_base = 'random';
+
+		$rules = array(
+			'random/?$'                => 'index.php?random=1',
+			'random/library/?$'        => 'index.php?post_type=library&random=1',
+			'random/feed/(feed|atom)/?$' => 'index.php?post_type=library&feed=$matches[1]',
+			'(.?.+?)(?:/([0-9]+))?/?$' => 'index.php?pagename=$matches[1]&page=$matches[2]',
+			'([^/]+)(?:/([0-9]+))?/?$' => 'index.php?name=$matches[1]&page=$matches[2]',
+			'category/random/?$'       => 'index.php?category_name=random',
+		);
+
+		$filtered = apply_filters( 'option_rewrite_rules', $rules );
+
+		$this->assertSame( 'index.php?post_type=library', $filtered['random/?$'] );
+		$this->assertArrayNotHasKey( 'random/library/?$', $filtered );
+		$this->assertSame( 'index.php?post_type=library&feed=$matches[1]', $filtered['random/feed/(feed|atom)/?$'] );
+		$this->assertSame( 'index.php?pagename=$matches[1]&page=$matches[2]', $filtered['(.?.+?)(?:/([0-9]+))?/?$'] );
+		$this->assertSame( 'index.php?name=$matches[1]&page=$matches[2]', $filtered['([^/]+)(?:/([0-9]+))?/?$'] );
+		$this->assertSame( 'index.php?category_name=random', $filtered['category/random/?$'] );
+		$this->assertSame( $filtered, apply_filters( 'rewrite_rules_array', $rules ) );
+	}
+
+	/**
+	 * The rebuilt archive follows a custom random base and the site root.
+	 *
+	 * @return void
+	 */
+	public function test_archive_slug_matches_a_custom_random_base_under_a_root(): void {
+
+		$invoices               = new stdClass();
+		$invoices->name         = 'invoice';
+		$invoices->public       = true;
+		$invoices->has_archive  = 'zufall';
+		$invoices->rewrite      = array(
+			'slug'       => 'invoices',
+			'with_front' => false,
+		);
+		$GLOBALS['wp_post_types'] = array(
+			'invoice' => $invoices,
+		);
+		$GLOBALS['wp_rewrite']        = new stdClass();
+		$GLOBALS['wp_rewrite']->root  = 'blog/';
+		$GLOBALS['wp_rewrite']->front = '/blog/';
+		$GLOBALS['wp_rewrite']->index = 'index.php';
+		$GLOBALS['wp_rewrite']->random_base = 'zufall';
+
+		$rules = array(
+			'blog/zufall/?$'           => 'index.php?random=1',
+			'blog/zufall/zufall/?$'    => 'index.php?post_type=invoice&random=1',
+			'(.?.+?)(?:/([0-9]+))?/?$' => 'index.php?pagename=$matches[1]&page=$matches[2]',
+		);
+
+		$filtered = apply_filters( 'option_rewrite_rules', $rules );
+
+		$this->assertSame( 'index.php?post_type=invoice', $filtered['blog/zufall/?$'] );
+		$this->assertArrayNotHasKey( 'blog/zufall/zufall/?$', $filtered );
+		$this->assertSame( 'index.php?pagename=$matches[1]&page=$matches[2]', $filtered['(.?.+?)(?:/([0-9]+))?/?$'] );
+	}
+
+	/**
 	 * A missing rewrite option stays missing so WordPress can generate rules itself.
 	 *
 	 * Returning an empty array would look like a stored ruleset and can force a write.

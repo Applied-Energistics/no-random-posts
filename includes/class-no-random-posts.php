@@ -125,12 +125,151 @@ class No_Random_Posts {
 		}
 
 		foreach ( $rules as $pattern => $target ) {
-			if ( $this->rule_sets_random_query_var( $target ) ) {
-				unset( $rules[ $pattern ] );
+			if ( ! $this->rule_sets_random_query_var( $target ) ) {
+				continue;
 			}
+
+			$archive_query = $this->archive_query_for_random_base_pattern( $pattern, $target );
+
+			if ( is_string( $archive_query ) && $archive_query !== '' ) {
+				$rules[ $pattern ] = $archive_query;
+				continue;
+			}
+
+			unset( $rules[ $pattern ] );
 		}
 
 		return $rules;
+	}
+
+	/**
+	 * Rebuilds a post type archive query stolen by the random redirect.
+	 *
+	 * The redirect and the archive share one pattern when the archive slug is the
+	 * random base, for example `random/?$`. Cached rules keep only the redirect.
+	 * Putting the archive query back does not write the option.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $pattern Rewrite pattern.
+	 * @param mixed $target  Rewrite target that sets the random query variable.
+	 * @return string Archive query, or an empty string when this pattern is not that archive.
+	 */
+	private function archive_query_for_random_base_pattern( $pattern, $target ) {
+
+		if ( ! is_string( $pattern ) || ! isset( $GLOBALS['wp_post_types'] ) || ! is_array( $GLOBALS['wp_post_types'] ) ) {
+			return '';
+		}
+
+		$random_base = $this->random_content_base();
+
+		foreach ( $GLOBALS['wp_post_types'] as $post_type_object ) {
+			if ( ! is_object( $post_type_object ) || empty( $post_type_object->public ) ) {
+				continue;
+			}
+
+			if ( ! isset( $post_type_object->name ) || ! is_string( $post_type_object->name ) || $post_type_object->name === '' ) {
+				continue;
+			}
+
+			if ( $this->archive_rewrite_pattern( $post_type_object, $random_base ) !== $pattern ) {
+				continue;
+			}
+
+			return $this->rewrite_index_from_target( $target ) . '?post_type=' . $post_type_object->name;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Builds the archive rewrite pattern when its slug is the random base.
+	 *
+	 * Matches the pattern `WP_Post_Type::add_rewrite_rules()` stores, including
+	 * the front or root prefix.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $post_type   Public post type object.
+	 * @param string $random_base Random content base slug, without the root.
+	 * @return string Pattern ending in `/?$`, or an empty string when this archive is not the random base.
+	 */
+	private function archive_rewrite_pattern( $post_type, $random_base ) {
+
+		if ( empty( $post_type->has_archive ) || ! is_array( $post_type->rewrite ) ) {
+			return '';
+		}
+
+		$slug = $post_type->has_archive === true ? ( $post_type->rewrite['slug'] ?? '' ) : $post_type->has_archive;
+
+		if ( ! is_string( $slug ) || $slug === '' || $slug !== $random_base ) {
+			return '';
+		}
+
+		$rewrite    = ( isset( $GLOBALS['wp_rewrite'] ) && is_object( $GLOBALS['wp_rewrite'] ) ) ? $GLOBALS['wp_rewrite'] : null;
+		$with_front = ! isset( $post_type->rewrite['with_front'] ) || $post_type->rewrite['with_front'];
+
+		if ( $with_front ) {
+			$front = ( $rewrite && isset( $rewrite->front ) && is_string( $rewrite->front ) ) ? $rewrite->front : '';
+			$slug  = substr( $front, 1 ) . $slug;
+		} else {
+			$root = ( $rewrite && isset( $rewrite->root ) && is_string( $rewrite->root ) ) ? $rewrite->root : '';
+			$slug = $root . $slug;
+		}
+
+		return $slug . '/?$';
+	}
+
+	/**
+	 * Reads the random content base slug.
+	 *
+	 * Uses `WP_Rewrite::get_random_base()` when WordPress 7.2 provides it.
+	 * Otherwise uses a custom base already stored on the rewrite object, then `random`.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string Random base slug.
+	 */
+	private function random_content_base() {
+
+		$rewrite = ( isset( $GLOBALS['wp_rewrite'] ) && is_object( $GLOBALS['wp_rewrite'] ) ) ? $GLOBALS['wp_rewrite'] : null;
+
+		if ( $rewrite && method_exists( $rewrite, 'get_random_base' ) ) {
+			$base = $rewrite->get_random_base();
+
+			if ( is_string( $base ) && $base !== '' ) {
+				return $base;
+			}
+		}
+
+		if ( $rewrite && isset( $rewrite->random_base ) && is_string( $rewrite->random_base ) && $rewrite->random_base !== '' ) {
+			return $rewrite->random_base;
+		}
+
+		return 'random';
+	}
+
+	/**
+	 * Reads the index file from a rewrite target.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $target Rewrite target, usually `index.php?...`.
+	 * @return string Index file name.
+	 */
+	private function rewrite_index_from_target( $target ) {
+
+		if ( ! is_string( $target ) ) {
+			return 'index.php';
+		}
+
+		$query_pos = strpos( $target, '?' );
+
+		if ( $query_pos === false || $query_pos === 0 ) {
+			return 'index.php';
+		}
+
+		return substr( $target, 0, $query_pos );
 	}
 
 	/**
