@@ -1,0 +1,14 @@
+# Development files excluded from the WordPress.org release zip.
+/.git
+/.github
+/.gitignore
+/.distignore
+/.gitattributes
+/.phpunit.cache
+/.phpunit.result.cache
+/tests
+/vendor
+/phpunit.xml
+/phpunit.xml.dist
+/composer.json
+/composer.lock
