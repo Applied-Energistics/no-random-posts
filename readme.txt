@@ -8,53 +8,61 @@ Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress answers /random/ with a public post. This stops that. No settings.
+Visit /random/ on your website, and WordPress will issue a 302 redirect to a randomly selected public post.
 
 == Description ==
 
-Open `/random/` and WordPress sends you somewhere else. The response is a 302. The somewhere else is a public post it chose at random.
+Visit `/random/` on your website, and WordPress will issue a 302 redirect to a randomly selected public post.
 
-You did not switch this on. It is on for the whole site. A site that has sat there for years has a public address you never added.
+That might sound harmless, but there are a few reasons that this can be a problem.
 
-Plenty of plugins register invoices, applications, or notes as a public type with an archive. The flag that would keep them out is called `randomable`. You have never set it, because you have never seen it. One of those records can be the page at the end of the redirect. Google follows it. So do the chatbots.
+For starters, WordPress doesn't necessarily limit its selection to ordinary blog posts. Plugins frequently register custom post types for things like invoices, applications, documents, or internal records. If those types are publicly accessible and have archives, they may also be eligible for random selection. There's a `randomable` setting to control this, but unless you've explicitly configured it, you might be exposing content in ways you hadn't anticipated.
 
-Activate No Random Posts and those addresses 404. A page you actually named random still loads. There is no settings screen. You do not have to open every post type looking for a flag.
+Then there's the SEO problem. Search engines and AI crawlers can discover `/random/`, follow its redirects, and repeatedly encounter different content at the same address. That's hardly ideal if you're trying to maintain a predictable, well-structured website with sensible crawling and indexing behaviour.
 
-WordPress finds that post by picking a random row. A bigger table makes that slower, and a bot can sit on `/random/` all day. This plugin never runs that query.
+And, of course, there's a performance consideration. Selecting a random post requires a database query, which can become increasingly expensive as your content grows. An enthusiastic crawler repeatedly requesting `/random/` can generate a surprising amount of unnecessary work.
 
-Nothing is saved. On WordPress older than 7.2 the plugin does not crash, and it leaves every other URL alone. `/random/` was already a 404 if you had no page by that name.
+No Random Posts disables this behaviour entirely.
 
-The feature is written up in the core dev note, 5 November 2026: https://make.wordpress.org/core/2026/11/05/your-content-is-going-to-get-more-random/
+Activate the plugin, and requests to `/random/` return a proper 404 response. No redirects, no random database queries, and no unexpected exposure of content through this mechanism.
+
+It's deliberately minimal. There are no settings to configure, no database changes, and no need to audit every custom post type to work out whether it's eligible. It also takes care not to interfere with legitimate content, so if you've actually created a page called `random`, that'll continue to work normally. The same is true of a post or term that already owns that address. If nothing else owns the path, the request stays a 404.
+
+The plugin is also backwards-compatible with WordPress versions before 7.2, where it safely leaves existing behaviour alone.
+
+One small plugin, one less piece of WordPress weirdness to worry about.
+
+The feature is described in the core dev note from 5 November 2026: https://make.wordpress.org/core/2026/11/05/your-content-is-going-to-get-more-random/
 
 == Installation ==
 
-1. Upload the plugin to `/wp-content/plugins/`, or install the zip on the Plugins screen.
+1. Upload the plugin to `/wp-content/plugins/`, or install the zip from the Plugins screen.
 2. Activate No Random Posts.
 
-You do not resave permalinks.
+That's the whole job. You don't need to resave permalinks.
 
 == Frequently Asked Questions ==
 
 = Are there any settings? =
 
-No. Turn it on. That is the whole job.
+No. There is nothing to configure. Activate the plugin and you're done.
 
-= Will /random/ 404? =
+= Will /random/ return 404? =
 
-Yes, unless you already have a real page, post, or term at that address. A page named random still loads.
+Yes, unless a real page, post, or term already owns that address. A page you've actually called `random` still works.
 
 = Does it work before WordPress 7.2? =
 
-Yes. Older WordPress does not have these URLs. The plugin does not crash, and it does not change anything else.
+Yes. Older versions don't have these URLs. The plugin safely leaves existing behaviour alone, and it doesn't crash.
 
 = Does it store any data? =
 
-No. No options, no tables, nothing of its own to delete later. It does not send email.
+No. There are no database changes, no options, and nothing of its own to delete later. It doesn't send email.
 
 == Changelog ==
 
 = 1.0.1 =
-* Readme now says what /random/ does to a site you already have.
+* Readme now explains what /random/ does on a site you already have.
 
 = 1.0.0 =
 * First release.
