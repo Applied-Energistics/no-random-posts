@@ -1,18 +1,30 @@
 # No Random Posts
 
-WordPress plugin that disables core’s random content URLs (`/random/`, and the author, term, and post type variants) for every post type. There are no settings and nothing is stored.
+Visit `/random/` on your website, and WordPress will issue a `302` redirect to a randomly selected public post.
 
-WordPress 7.2 adds public URLs that 302 to a randomly chosen published post. A post type is included when it is publicly queryable and has an archive, unless it was registered with `randomable` set to false. Custom post types are often registered without that argument, so content that was never linked (invoices, for example) can be selected and exposed. The redirect URL can also be stored as its own URL by search engines and LLMs. Core sends `X-Robots-Tag: noindex` on the redirect response. That header does not stop the destination being discovered, and it is not a noindex control for the content itself.
+That might sound harmless, but there are a few reasons that this can be a problem.
 
-WordPress resolves `/random/` with a random-order query (`ORDER BY RAND()` or the same class of query). That cost grows with the number of rows, and some hosts already restrict `RAND()`. Bots that request `/random/` over and over can amplify that into a load problem, including on large catalogues. Core has discussed an optimisation (https://core.trac.wordpress.org/ticket/64498#comment:58); it does not remove the scaling problem. This plugin makes those URLs 404 before that query runs.
+For starters, WordPress doesn't necessarily limit its selection to ordinary blog posts. Plugins frequently register custom post types for things like invoices, applications, documents, or internal records. If those types are publicly accessible and have archives, they may also be eligible for random selection. There's a `randomable` setting to control this, but unless you've explicitly configured it, you might be exposing content in ways you hadn't anticipated.
 
-A page, post, or term whose slug is actually `random` still loads. Only the random-redirect endpoints are removed. If nothing else owns that path, the request stays a 404.
+Then there's the SEO problem. Search engines and AI crawlers can discover `/random/`, follow its redirects, and repeatedly encounter different content at the same address. That's hardly ideal if you're trying to maintain a predictable, well-structured website with sensible crawling and indexing behaviour.
 
-The same description is in [readme.txt](readme.txt).
+And, of course, there's a performance consideration. Selecting a random post requires a database query, which can become increasingly expensive as your content grows. An enthusiastic crawler repeatedly requesting `/random/` can generate a surprising amount of unnecessary work.
+
+**No Random Posts disables this behaviour entirely.**
+
+Activate the plugin, and requests to `/random/` return a proper `404` response. No redirects, no random database queries, and no unexpected exposure of content through this mechanism.
+
+It's deliberately minimal. There are no settings to configure, no database changes, and no need to audit every custom post type to work out whether it's eligible. It also takes care not to interfere with legitimate content, so if you've actually created a page called `random`, that'll continue to work normally.
+
+The plugin is also backwards-compatible with WordPress versions before 7.2, where it safely leaves existing behaviour alone.
+
+One small plugin, one less piece of WordPress weirdness to worry about.
+
+See readme.txt for the WordPress plugin directory documentation and a link to the development notes.
 
 ## Tests
 
-The tests mock the WordPress hook API and do not need a database.
+The tests use a lightweight mock of WordPress, so there's no need to set up a database or a full WordPress installation.
 
 ```bash
 composer install
