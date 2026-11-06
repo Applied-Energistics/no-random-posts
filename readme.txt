@@ -8,62 +8,53 @@ Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Turns off WordPress /random/ URLs before they can surface a post you never meant anyone to find. No settings.
+WordPress 7.2 will answer /random/ with a public post. This stops that. No settings.
 
 == Description ==
 
-WordPress 7.2 is about to add `/random/` URLs. A request 302s to a random public post. This is on for every site. There is no opt-in.
+Open `/random/` on a WordPress 7.2 site and you get sent somewhere else. The response is a 302. The somewhere else is a public post WordPress chose at random.
 
-That can surface invoices, drafts-of-a-sort, and other types people never meant to be found. Custom post types are often registered without careful public flags. If a type is publicly queryable and has an archive, it is included unless someone set `randomable` to false. Core has no noindex for the content itself. Search engines and LLMs can keep the redirect. The `X-Robots-Tag: noindex` header on that 302 does not stop the destination being discovered.
+You did not switch this on. The update does. A site that has sat there quietly for years wakes up with a new public address.
 
-No Random Posts turns those URLs off, for every post type, with no settings. A real page, post, or term whose slug is `random` still works. If nothing else owns the path, the request stays a 404.
+Plenty of plugins register invoices, applications, or notes as a public type with an archive. The new flag that would keep them out is called `randomable`. You have never set it, because you have never seen it. One of those records can be the page at the end of the redirect. Google will follow it. So will the chatbots.
 
-With the default base and pretty permalinks, the new URLs are:
+Activate No Random Posts and those addresses 404. A page you actually named random still loads. There is no settings screen. You do not spend the night before the update opening every post type to check a box.
 
-* `/random/` for any eligible post.
-* `/random/category/news/` and the same pattern for every public taxonomy.
-* `/random/author/name/` for a post by that author.
-* `/random/{post-type}/` for a custom post type.
+WordPress finds that post by picking a random row. A bigger table makes that slower, and a bot can sit on `/random/` all day. This plugin never runs that query.
 
-The same applies to a translated or custom base, such as `/zufall/`.
+Nothing is saved. On WordPress older than 7.2 the plugin does not crash, and it leaves every other URL alone. `/random/` was already a 404 if you had no page by that name.
 
-There is a further cost. WordPress picks the post with `ORDER BY RAND()` (or the same class of query). The cost grows with the number of rows. Bots that request `/random/` over and over can turn that into a load problem. This plugin 404s the URL before that query runs.
-
-You do not get a settings screen, and nothing is stored. You do not need to resave permalinks. A post type registered before or after the plugin loads cannot opt back in.
-
-On older WordPress, nothing else changes. `/random/` is already a 404 unless a real route uses it. The plugin does not fatal when the 7.2 APIs are missing.
-
-Details of the feature are in the WordPress 7.2 dev note from 5 November 2026: https://make.wordpress.org/core/2026/11/05/your-content-is-going-to-get-more-random/
+The feature is written up in the WordPress 7.2 dev note, 5 November 2026: https://make.wordpress.org/core/2026/11/05/your-content-is-going-to-get-more-random/
 
 == Installation ==
 
-1. Upload the plugin to `/wp-content/plugins/`, or install the zip from the Plugins screen.
+1. Upload the plugin to `/wp-content/plugins/`, or install the zip on the Plugins screen.
 2. Activate No Random Posts.
 
-That is the whole setup. Permalinks do not need saving.
+You do not resave permalinks.
 
 == Frequently Asked Questions ==
 
 = Are there any settings? =
 
-No. It is on for every post type as soon as you activate it.
+No. Turn it on. That is the whole job.
 
-= Will /random/ return 404? =
+= Will /random/ 404? =
 
-Yes, unless that path is already a real page, post, term, or other route. A page with the slug `random` still works. So does a post or term with that slug at its own URL.
+Yes, unless you already have a real page, post, or term at that address. A page named random still loads.
 
 = Does it work before WordPress 7.2? =
 
-Yes. Older versions do not have these URLs. The plugin does not fatal, and it does not change any other URL.
+Yes. Older WordPress does not have these URLs. The plugin will not crash, and it will not change anything else.
 
 = Does it store any data? =
 
-No. No options, no tables, and no files of its own. It does not send email or telemetry. There is nothing to delete when you uninstall it.
+No. No options, no tables, nothing of its own to delete later. It does not send email.
 
 == Changelog ==
 
 = 1.0.1 =
-* Readme now leads with content leakage and unexpected endpoints.
+* Readme now says what /random/ does to a site you already have.
 
 = 1.0.0 =
-* Initial release.
+* First release.

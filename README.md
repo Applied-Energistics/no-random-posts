@@ -1,20 +1,22 @@
 # No Random Posts
 
-WordPress 7.2 is about to add `/random/` URLs. A request 302s to a random public post. This is on for every site. There is no opt-in.
+Open `/random/` on a WordPress 7.2 site and you get sent somewhere else. The response is a 302. The somewhere else is a public post WordPress chose at random.
 
-That can surface invoices, drafts-of-a-sort, and other types people never meant to be found. Custom post types are often registered without careful public flags. If a type is publicly queryable and has an archive, it is included unless someone set `randomable` to false. Core has no noindex for the content itself. Search engines and LLMs can keep the redirect.
+You did not switch this on. The update does. A site that has sat there quietly for years wakes up with a new public address.
 
-No Random Posts turns those URLs off, for every post type, with no settings. A real page, post, or term whose slug is `random` still works. If nothing else owns the path, the request stays a 404.
+Plenty of plugins register invoices, applications, or notes as a public type with an archive. The new flag that would keep them out is called `randomable`. You have never set it, because you have never seen it. One of those records can be the page at the end of the redirect. Google will follow it. So will the chatbots.
 
-There is a further cost. WordPress picks the post with `ORDER BY RAND()` (or the same class of query). The cost grows with the number of rows. Bots that request `/random/` over and over can turn that into a load problem. This plugin 404s the URL before that query runs.
+Activate No Random Posts and those addresses 404. A page you actually named random still loads. There is no settings screen. You do not spend the night before the update opening every post type to check a box.
 
-Nothing is stored. On older WordPress the plugin does not fatal, and it does not change any other URL.
+WordPress finds that post by picking a random row. A bigger table makes that slower, and a bot can sit on `/random/` all day. This plugin never runs that query.
 
-The same description is in [readme.txt](readme.txt).
+Nothing is saved. On WordPress older than 7.2 the plugin does not crash, and it leaves every other URL alone.
+
+The same words are in [readme.txt](readme.txt). The dev note is linked from there.
 
 ## Tests
 
-The tests mock the WordPress hook API. They do not need a database.
+The tests pretend WordPress is there. They do not need a database.
 
 ```bash
 composer install
