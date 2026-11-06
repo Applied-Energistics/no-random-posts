@@ -3,7 +3,7 @@ Contributors: jonoaldersonwp
 Tags: seo, privacy, redirects, permalinks
 Requires at least: 4.7
 Tested up to: 7.1
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -60,6 +60,9 @@ Yes. Older versions don't have these URLs. The plugin safely leaves existing beh
 No. There are no database changes, no options, and nothing of its own to delete later. It doesn't send email.
 
 == Changelog ==
+
+= 1.1.3 =
+* Released as 1.1.3.
 
 = 1.1.2 =
 * Readme notes that /random/ can be stuck on the end of other URLs.
