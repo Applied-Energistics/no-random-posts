@@ -1,0 +1,21 @@
+{
+	"name": "jonoalderson/no-random-posts",
+	"description": "Disables WordPress core random content URLs such as /random/.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Jono Alderson",
+			"homepage": "https://www.jonoalderson.com/"
+		}
+	],
+	"require": {
+		"php": ">=7.2"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^10.5"
+	},
+	"scripts": {
+		"test": "phpunit"
+	}
+}
