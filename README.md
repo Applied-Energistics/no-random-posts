@@ -1,12 +1,12 @@
 # No Random Posts
 
-Open `/random/` on a WordPress 7.2 site and you get sent somewhere else. The response is a 302. The somewhere else is a public post WordPress chose at random.
+Open `/random/` and WordPress sends you somewhere else. The response is a 302. The somewhere else is a public post it chose at random.
 
-You did not switch this on. The update does. A site that has sat there quietly for years wakes up with a new public address.
+You did not switch this on. It is on for the whole site. A site that has sat there for years has a public address you never added.
 
-Plenty of plugins register invoices, applications, or notes as a public type with an archive. The new flag that would keep them out is called `randomable`. You have never set it, because you have never seen it. One of those records can be the page at the end of the redirect. Google will follow it. So will the chatbots.
+Plenty of plugins register invoices, applications, or notes as a public type with an archive. The flag that would keep them out is called `randomable`. You have never set it, because you have never seen it. One of those records can be the page at the end of the redirect. Google follows it. So do the chatbots.
 
-Activate No Random Posts and those addresses 404. A page you actually named random still loads. There is no settings screen. You do not spend the night before the update opening every post type to check a box.
+Activate No Random Posts and those addresses 404. A page you actually named random still loads. There is no settings screen. You do not have to open every post type looking for a flag.
 
 WordPress finds that post by picking a random row. A bigger table makes that slower, and a bot can sit on `/random/` all day. This plugin never runs that query.
 

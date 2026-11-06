@@ -8,23 +8,23 @@ Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress 7.2 will answer /random/ with a public post. This stops that. No settings.
+WordPress answers /random/ with a public post. This stops that. No settings.
 
 == Description ==
 
-Open `/random/` on a WordPress 7.2 site and you get sent somewhere else. The response is a 302. The somewhere else is a public post WordPress chose at random.
+Open `/random/` and WordPress sends you somewhere else. The response is a 302. The somewhere else is a public post it chose at random.
 
-You did not switch this on. The update does. A site that has sat there quietly for years wakes up with a new public address.
+You did not switch this on. It is on for the whole site. A site that has sat there for years has a public address you never added.
 
-Plenty of plugins register invoices, applications, or notes as a public type with an archive. The new flag that would keep them out is called `randomable`. You have never set it, because you have never seen it. One of those records can be the page at the end of the redirect. Google will follow it. So will the chatbots.
+Plenty of plugins register invoices, applications, or notes as a public type with an archive. The flag that would keep them out is called `randomable`. You have never set it, because you have never seen it. One of those records can be the page at the end of the redirect. Google follows it. So do the chatbots.
 
-Activate No Random Posts and those addresses 404. A page you actually named random still loads. There is no settings screen. You do not spend the night before the update opening every post type to check a box.
+Activate No Random Posts and those addresses 404. A page you actually named random still loads. There is no settings screen. You do not have to open every post type looking for a flag.
 
 WordPress finds that post by picking a random row. A bigger table makes that slower, and a bot can sit on `/random/` all day. This plugin never runs that query.
 
 Nothing is saved. On WordPress older than 7.2 the plugin does not crash, and it leaves every other URL alone. `/random/` was already a 404 if you had no page by that name.
 
-The feature is written up in the WordPress 7.2 dev note, 5 November 2026: https://make.wordpress.org/core/2026/11/05/your-content-is-going-to-get-more-random/
+The feature is written up in the core dev note, 5 November 2026: https://make.wordpress.org/core/2026/11/05/your-content-is-going-to-get-more-random/
 
 == Installation ==
 
@@ -45,7 +45,7 @@ Yes, unless you already have a real page, post, or term at that address. A page 
 
 = Does it work before WordPress 7.2? =
 
-Yes. Older WordPress does not have these URLs. The plugin will not crash, and it will not change anything else.
+Yes. Older WordPress does not have these URLs. The plugin does not crash, and it does not change anything else.
 
 = Does it store any data? =
 
