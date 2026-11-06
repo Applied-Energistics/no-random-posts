@@ -19,14 +19,3 @@ It's deliberately minimal. There are no settings to configure, no database chang
 The plugin is also backwards-compatible with WordPress versions before 7.2, where it safely leaves existing behaviour alone.
 
 One small plugin, one less piece of WordPress weirdness to worry about.
-
-See readme.txt for the WordPress plugin directory documentation and a link to the development notes.
-
-## Tests
-
-The tests use a lightweight mock of WordPress, so there's no need to set up a database or a full WordPress installation.
-
-```bash
-composer install
-composer test
-```
