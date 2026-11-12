@@ -59,11 +59,13 @@ class NoRandomPostsTest extends TestCase {
 	 */
 	public function test_boot_is_idempotent(): void {
 
-		$before = $this->callback_count( 'wp_enable_random_content_redirect' );
+		$before      = $this->callback_count( 'wp_enable_random_content_redirect' );
+		$before_args = $this->callback_count( 'register_post_type_args' );
 
 		No_Random_Posts::boot();
 
 		$this->assertSame( $before, $this->callback_count( 'wp_enable_random_content_redirect' ) );
+		$this->assertSame( $before_args, $this->callback_count( 'register_post_type_args' ) );
 	}
 
 	/**
@@ -134,6 +136,116 @@ class NoRandomPostsTest extends TestCase {
 		do_action( 'init' );
 
 		$this->assertFalse( property_exists( $legacy, 'randomable' ) );
+	}
+
+	/**
+	 * Registration arguments are born ineligible, including an explicit opt-in.
+	 *
+	 * @return void
+	 */
+	public function test_registration_args_force_randomable_off(): void {
+
+		$this->support_randomable_argument();
+
+		$args = apply_filters(
+			'register_post_type_args',
+			array(
+				'public'             => true,
+				'publicly_queryable' => true,
+				'has_archive'        => true,
+				'randomable'         => true,
+				'label'              => 'Invoices',
+			),
+			'invoice'
+		);
+
+		$this->assertFalse( $args['randomable'] );
+		$this->assertTrue( $args['public'] );
+		$this->assertSame( 'Invoices', $args['label'] );
+	}
+
+	/**
+	 * A callback at the default priority cannot leave the argument on.
+	 *
+	 * @return void
+	 */
+	public function test_earlier_registration_callback_cannot_leave_randomable_on(): void {
+
+		$this->support_randomable_argument();
+
+		add_filter(
+			'register_post_type_args',
+			static function ( $args ) {
+
+				if ( ! is_array( $args ) ) {
+					return $args;
+				}
+
+				$args['randomable'] = true;
+
+				return $args;
+			},
+			10,
+			2
+		);
+
+		$args = apply_filters(
+			'register_post_type_args',
+			array(
+				'public'      => true,
+				'has_archive' => true,
+			),
+			'post'
+		);
+
+		$this->assertArrayHasKey( 'randomable', $args );
+		$this->assertFalse( $args['randomable'] );
+	}
+
+	/**
+	 * A per-type filter that opts back in is caught once the type is registered.
+	 *
+	 * `register_{post_type}_post_type_args` runs after the general filter.
+	 *
+	 * @return void
+	 */
+	public function test_specific_post_type_opt_in_is_caught_on_registration(): void {
+
+		$this->support_randomable_argument();
+
+		add_filter(
+			'register_ledger_post_type_args',
+			static function ( $args ) {
+
+				$args['randomable'] = true;
+
+				return $args;
+			},
+			PHP_INT_MAX
+		);
+
+		$args = apply_filters( 'register_post_type_args', array( 'public' => true ), 'ledger' );
+		$args = apply_filters( 'register_ledger_post_type_args', $args, 'ledger' );
+
+		$ledger = new No_Random_Posts_Post_Type_Double( 'ledger', $args['randomable'] );
+		$this->assertTrue( $ledger->randomable );
+
+		do_action( 'registered_post_type', 'ledger', $ledger );
+
+		$this->assertFalse( $ledger->randomable );
+	}
+
+	/**
+	 * Unexpected registration values do not fatal.
+	 *
+	 * @return void
+	 */
+	public function test_registration_args_ignore_unexpected_values(): void {
+
+		$this->support_randomable_argument();
+
+		$this->assertSame( 'nope', apply_filters( 'register_post_type_args', 'nope', 'invoice' ) );
+		$this->assertNull( apply_filters( 'register_post_type_args', null, 'invoice' ) );
 	}
 
 	/**
@@ -480,6 +592,20 @@ class NoRandomPostsTest extends TestCase {
 		do_action( 'parse_request', $wp );
 
 		$this->assertFalse( isset( $wp->query_vars ) );
+	}
+
+	/**
+	 * Declares the randomable property WordPress 7.2 adds to WP_Post_Type.
+	 *
+	 * @return void
+	 */
+	private function support_randomable_argument() {
+
+		if ( class_exists( 'WP_Post_Type', false ) ) {
+			return;
+		}
+
+		require_once __DIR__ . '/stubs/class-wp-post-type.php';
 	}
 
 	/**
