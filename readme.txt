@@ -62,7 +62,7 @@ No. There are no database changes, no options, and nothing of its own to delete 
 == Changelog ==
 
 = 1.1.4 =
-* Force the `randomable` registration argument off for every post type, before core defaults a public archive to eligible.
+* Force the `randomable` registration argument off for every post type, before core defaults a public archive to eligible. Props peterwilsoncc.
 
 = 1.1.3 =
 * Released as 1.1.3.
