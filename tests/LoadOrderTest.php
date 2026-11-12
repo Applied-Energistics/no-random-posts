@@ -105,4 +105,29 @@ class LoadOrderTest extends TestCase {
 		$this->assertFalse( property_exists( $legacy, 'randomable' ) );
 		$this->assertTrue( class_exists( 'No_Random_Posts' ) );
 	}
+
+	/**
+	 * Registration arguments stay untouched when WordPress has no randomable property.
+	 *
+	 * Setting the argument on those versions would add a property core never reads.
+	 *
+	 * @return void
+	 */
+	#[RunInSeparateProcess]
+	#[PreserveGlobalState( false )]
+	public function test_registration_args_are_unchanged_without_randomable(): void {
+
+		$this->assertFalse( class_exists( 'WP_Post_Type', false ) );
+
+		require dirname( __DIR__ ) . '/no-random-posts.php';
+
+		$args = array(
+			'public'             => true,
+			'publicly_queryable' => true,
+			'has_archive'        => true,
+			'randomable'         => true,
+		);
+
+		$this->assertSame( $args, apply_filters( 'register_post_type_args', $args, 'book' ) );
+	}
 }

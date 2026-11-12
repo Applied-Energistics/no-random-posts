@@ -13,8 +13,9 @@ defined( 'ABSPATH' ) || exit;
  * WordPress 7.2 redirects `/random/` (and author, term, and post type variants)
  * to a random post. The official switch is the `wp_enable_random_content_redirect`
  * filter. Cached rewrite rules and the `random` query variable can still fire
- * after that filter is set, and a post type registered without `randomable`
- * defaults to eligible, so those paths are removed as well.
+ * after that filter is set. A post type registered without `randomable` defaults
+ * to eligible, so the registration argument is forced off and those paths are
+ * removed as well.
  *
  * @since 1.0.0
  */
@@ -68,6 +69,7 @@ class No_Random_Posts {
 		add_filter( 'request', [ $this, 'remove_random_request_var' ], PHP_INT_MAX );
 
 		add_action( 'parse_request', [ $this, 'remove_random_from_parsed_request' ], PHP_INT_MAX );
+		add_filter( 'register_post_type_args', [ $this, 'disable_post_type_args' ], PHP_INT_MAX );
 		add_action( 'registered_post_type', [ $this, 'disable_post_type' ], PHP_INT_MAX, 2 );
 		add_action( 'init', [ $this, 'disable_registered_post_types' ], PHP_INT_MAX );
 		add_action( 'wp_loaded', [ $this, 'disable_registered_post_types' ], 0 );
@@ -355,6 +357,45 @@ class No_Random_Posts {
 		}
 
 		$GLOBALS['wp']->remove_query_var( self::QUERY_VAR );
+	}
+
+	/**
+	 * Forces the randomable registration argument off.
+	 *
+	 * Core defaults an omitted flag to true for a publicly queryable archive
+	 * after this filter runs, so the post type object is created ineligible.
+	 * A `register_{post_type}_post_type_args` callback can still turn it back
+	 * on; `registered_post_type` catches that. WordPress versions that do not
+	 * declare the property are left unchanged, because setting the argument
+	 * there would add a property core never reads.
+	 *
+	 * @since 1.1.4
+	 *
+	 * @param mixed $args Post type arguments.
+	 * @return mixed Arguments, with randomable forced off when that argument exists.
+	 */
+	public function disable_post_type_args( $args ) {
+
+		if ( ! is_array( $args ) || ! $this->randomable_argument_supported() ) {
+			return $args;
+		}
+
+		$args['randomable'] = false;
+
+		return $args;
+	}
+
+	/**
+	 * Reports whether this WordPress version accepts the randomable argument.
+	 *
+	 * The property is declared on `WP_Post_Type` from 7.2.
+	 *
+	 * @since 1.1.4
+	 *
+	 * @return bool Whether `register_post_type()` accepts randomable.
+	 */
+	private function randomable_argument_supported() {
+		return class_exists( 'WP_Post_Type', false ) && property_exists( 'WP_Post_Type', 'randomable' );
 	}
 
 	/**
